@@ -30,4 +30,22 @@ class CategoryPagerAdapter(
                 CategoryFragment.newInstance(position)
             }
         }
+
+    // FragmentStateAdapter caches fragments by item ID (the position by default).
+    // In Shop mode the summary moves to the end when categories are added, so it
+    // needs its own ID or the old position keeps showing a stale summary.
+    override fun getItemId(position: Int): Long {
+        val size = viewModel.categories.value?.size ?: 0
+        return if (!planMode && position == size) SUMMARY_ID else position.toLong()
+    }
+
+    override fun containsItem(itemId: Long): Boolean {
+        if (planMode) return super.containsItem(itemId)
+        val size = viewModel.categories.value?.size ?: 0
+        return itemId == SUMMARY_ID || itemId in 0 until size
+    }
+
+    companion object {
+        private const val SUMMARY_ID = -1L
+    }
 }
